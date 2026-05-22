@@ -28,8 +28,10 @@ export async function POST(request) {
     const taskData = await request.json()
     console.debug('[API] POST /api/tasks - Payload received for task:', taskData.taskName);
     
+    const { userId, taskName, description, deadline } = taskData;
+
     // Validate required fields
-    if (!taskData.userId || !taskData.taskName || !taskData.description || !taskData.deadline) {
+    if (!userId || !taskName || !description || !deadline) {
       console.warn('[API Warning] POST /api/tasks - Missing required fields in payload');
       return NextResponse.json(
         { error: 'UserId, taskName, description, and deadline are required' },
