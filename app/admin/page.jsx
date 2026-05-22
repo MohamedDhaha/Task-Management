@@ -13,19 +13,29 @@ export default function AdminDashboard() {
   })
   const [loading, setLoading] = useState(true)
 
+  // Fetch initial dashboard statistics when component mounts
   useEffect(() => {
+    console.debug('[Admin Dashboard] Component mounted, initiating data fetch...');
     fetchStats()
   }, [])
 
+  /**
+   * Fetches system-wide statistics for the admin overview
+   * Updates local state with the results
+   */
   const fetchStats = async () => {
     try {
+      console.debug('[Admin Dashboard] Fetching system-wide stats...');
       const response = await fetch('/api/stats')
       if (response.ok) {
         const data = await response.json()
         setStats(data)
+        console.debug('[Admin Dashboard] Successfully loaded system stats');
+      } else {
+        console.warn(`[Admin Dashboard Warning] Failed to fetch stats. Status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error fetching stats:', error)
+      console.error('[Admin Dashboard Error] Exception fetching stats:', error)
     } finally {
       setLoading(false)
     }

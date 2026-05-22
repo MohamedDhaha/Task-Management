@@ -13,10 +13,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
+  /**
+   * Handles user login submission
+   * Validates credentials against the API and updates local session state upon success
+   */
   const handleLogin = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    console.debug(`[Auth] Attempting login for type: ${loginType}, email: ${email}`);
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -34,12 +39,15 @@ export default function LoginPage() {
       const data = await response.json()
 
       if (response.ok) {
+        console.log('[Auth] Login successful. Saving session and redirecting.');
         localStorage.setItem('currentUser', JSON.stringify(data.user))
         router.push(loginType === 'admin' ? '/admin' : '/dashboard')
       } else {
+        console.warn(`[Auth Warning] Login failed. Server responded with: ${data.error || 'unknown error'}`);
         setError(data.error || 'Login failed')
       }
     } catch (err) {
+      console.error('[Auth Error] Exception during login request:', err);
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)

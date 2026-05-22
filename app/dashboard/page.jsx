@@ -15,37 +15,62 @@ export default function UserDashboard() {
   })
   const [loading, setLoading] = useState(true)
 
+  // Load user data and fetch dashboard content on mount
   useEffect(() => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
-    setUser(currentUser)
-    
-    if (currentUser._id) {
-      fetchUserTasks(currentUser._id)
-      fetchUserStats(currentUser._id)
+    console.debug('[Dashboard] Component mounted, checking for logged-in user...');
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+      setUser(currentUser)
+      
+      if (currentUser._id) {
+        console.debug(`[Dashboard] Valid user found (${currentUser._id}). Fetching dashboard data...`);
+        fetchUserTasks(currentUser._id)
+        fetchUserStats(currentUser._id)
+      } else {
+        console.warn('[Dashboard Warning] No valid user found in localStorage');
+      }
+    } catch (error) {
+      console.error('[Dashboard Error] Failed to parse user from localStorage:', error);
     }
   }, [])
 
+  /**
+   * Fetches the user's tasks from the API and updates state
+   * @param {string} userId - The ID of the user to fetch tasks for
+   */
   const fetchUserTasks = async (userId) => {
     try {
+      console.debug(`[Dashboard] Fetching tasks for user: ${userId}`);
       const response = await fetch(`/api/tasks/user/${userId}`)
       if (response.ok) {
         const data = await response.json()
         setTasks(data)
+        console.debug(`[Dashboard] Successfully loaded ${data.length} tasks`);
+      } else {
+        console.warn(`[Dashboard Warning] Failed to fetch tasks. Response status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error fetching user tasks:', error)
+      console.error('[Dashboard Error] Exception fetching user tasks:', error)
     }
   }
 
+  /**
+   * Fetches the user's dashboard statistics from the API
+   * @param {string} userId - The ID of the user to fetch stats for
+   */
   const fetchUserStats = async (userId) => {
     try {
+      console.debug(`[Dashboard] Fetching stats for user: ${userId}`);
       const response = await fetch(`/api/stats/user/${userId}`)
       if (response.ok) {
         const data = await response.json()
         setStats(data)
+        console.debug('[Dashboard] Successfully loaded user stats');
+      } else {
+        console.warn(`[Dashboard Warning] Failed to fetch stats. Response status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error fetching user stats:', error)
+      console.error('[Dashboard Error] Exception fetching user stats:', error)
     } finally {
       setLoading(false)
     }
